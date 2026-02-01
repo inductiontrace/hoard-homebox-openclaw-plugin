@@ -1,0 +1,38 @@
+{
+  "id": "homebox",
+  "name": "HomeBox Integration",
+  "description": "Query and manage HomeBox inventory",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "baseUrl": {
+        "type": "string",
+        "description": "HomeBox API base URL (e.g., http://localhost:3100)"
+      },
+      "username": {
+        "type": "string",
+        "description": "HomeBox username for authentication"
+      },
+      "password": {
+        "type": "string",
+        "description": "HomeBox password for authentication"
+      }
+    },
+    "required": ["username", "password"]
+  },
+  "uiHints": {
+    "baseUrl": {
+      "label": "HomeBox URL",
+      "placeholder": "http://localhost:3100"
+    },
+    "username": {
+      "label": "Username",
+      "placeholder": "user@example.com"
+    },
+    "password": {
+      "label": "Password",
+      "sensitive": true
+    }
+  }
+}
