@@ -1,7 +1,7 @@
 {
-  "id": "homebox",
-  "name": "HomeBox Integration",
-  "description": "Query and manage HomeBox inventory",
+  "id": "hoard",
+  "name": "Hoard",
+  "description": "Intelligent HomeBox inventory management for OpenClaw",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,

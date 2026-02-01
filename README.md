@@ -1,4 +1,4 @@
-# HomeBox Plugin for OpenClaw
+# Hoard — HomeBox Plugin for OpenClaw
 
 Build an **intelligent inventory database** for your physical belongings. Turn HomeBox (open-source inventory management) into an AI-powered personal assistant that helps you find, organize, and track your stuff.
 
@@ -71,7 +71,7 @@ Agents can combine these tools to manage inventory, answer "where is X?" questio
    {
      "plugins": {
        "entries": {
-         "homebox": {
+         "hoard": {
            "enabled": true,
            "config": {
              "baseUrl": "http://localhost:3100",
@@ -96,7 +96,7 @@ Agents can combine these tools to manage inventory, answer "where is X?" questio
 
 ## Configuration
 
-All config goes in `plugins.entries.homebox.config`:
+All config goes in `plugins.entries.hoard.config`:
 
 | Field | Required | Description |
 |-------|----------|-------------|
@@ -307,8 +307,8 @@ npm test
 
 ## Troubleshooting
 
-**"HomeBox plugin requires username and password"**
-- Check `plugins.entries.homebox.config.username` and `.password` in `~/.openclaw/openclaw.json`
+**"Hoard plugin requires username and password"**
+- Check `plugins.entries.hoard.config.username` and `.password` in `~/.openclaw/openclaw.json`
 - Verify no typos in the config path
 - Restart gateway: `openclaw gateway restart`
 
@@ -319,7 +319,7 @@ npm test
 
 **Tools not appearing in agent**
 - Verify plugin is installed: `openclaw plugins list`
-- Check it's enabled: `openclaw plugins info homebox`
+- Check it's enabled: `openclaw plugins info hoard`
 - Restart gateway: `openclaw gateway restart`
 
 **Agent adds duplicate items**
