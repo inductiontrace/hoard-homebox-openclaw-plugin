@@ -144,18 +144,89 @@ const plugin = {
           },
           locationId: {
             type: "string",
-            description: "Location ID",
+            description: "Location ID where item is stored",
+          },
+          notes: {
+            type: "string",
+            description: "Additional notes or comments",
+          },
+          serialNumber: {
+            type: "string",
+            description: "Serial number or asset ID",
+          },
+          modelNumber: {
+            type: "string",
+            description: "Model number or identifier",
+          },
+          manufacturer: {
+            type: "string",
+            description: "Manufacturer name",
+          },
+          insured: {
+            type: "boolean",
+            description: "Whether item is insured",
+          },
+          archived: {
+            type: "boolean",
+            description: "Archive item (hidden from normal search)",
+          },
+          lifetimeWarranty: {
+            type: "boolean",
+            description: "Whether item has lifetime warranty",
+          },
+          warrantyExpires: {
+            type: "string",
+            description: "Warranty expiration date (YYYY-MM-DD format)",
+          },
+          warrantyDetails: {
+            type: "string",
+            description: "Warranty coverage details",
+          },
+          purchaseTime: {
+            type: "string",
+            description: "Date item was purchased (YYYY-MM-DD format)",
+          },
+          purchaseFrom: {
+            type: "string",
+            description: "Where item was purchased (store, seller, etc.)",
+          },
+          purchasePrice: {
+            type: "number",
+            description: "Purchase price",
+          },
+          tagIds: {
+            type: "array",
+            items: { type: "string" },
+            description: "Array of tag IDs to assign",
+          },
+          parentId: {
+            type: "string",
+            description: "Parent item ID (for nested/bundled items)",
           },
         },
         required: ["name", "quantity"],
       },
-      async execute(_id, params) {
+      async execute(_id, params: any) {
         const client = getClient();
         const created = await client.createItem({
           name: params.name,
           quantity: params.quantity,
           description: params.description,
           locationId: params.locationId,
+          notes: params.notes,
+          serialNumber: params.serialNumber,
+          modelNumber: params.modelNumber,
+          manufacturer: params.manufacturer,
+          insured: params.insured,
+          archived: params.archived,
+          lifetimeWarranty: params.lifetimeWarranty,
+          warrantyExpires: params.warrantyExpires,
+          warrantyDetails: params.warrantyDetails,
+          purchaseTime: params.purchaseTime,
+          purchaseFrom: params.purchaseFrom,
+          purchasePrice: params.purchasePrice,
+          tagIds: params.tagIds,
+          parentId: params.parentId,
         });
 
         const text = `✓ Added to HomeBox:\n• Name: ${created.name}\n• Quantity: ${created.quantity}\n• Location: ${created.location?.name || "Unknown"}`;

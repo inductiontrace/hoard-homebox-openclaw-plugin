@@ -18,6 +18,19 @@ export interface HomeBoxItem {
   locationId?: string;
   location?: { id: string; name: string };
   notes?: string;
+  serialNumber?: string;
+  modelNumber?: string;
+  manufacturer?: string;
+  insured?: boolean;
+  archived?: boolean;
+  lifetimeWarranty?: boolean;
+  warrantyExpires?: string;
+  warrantyDetails?: string;
+  purchaseTime?: string;
+  purchaseFrom?: string;
+  purchasePrice?: number;
+  tagIds?: string[];
+  parentId?: string;
 }
 
 export interface HomeBoxLocation {
@@ -111,13 +124,28 @@ export class HomeBoxClient {
   }
 
   async createItem(item: HomeBoxItem): Promise<HomeBoxItem> {
-    const payload = {
+    const payload: Record<string, unknown> = {
       name: item.name,
-      description: item.description || "",
       quantity: item.quantity,
-      locationId: item.locationId,
-      notes: item.notes || "",
     };
+
+    // Add optional fields if provided
+    if (item.description !== undefined) payload.description = item.description;
+    if (item.locationId !== undefined) payload.locationId = item.locationId;
+    if (item.notes !== undefined) payload.notes = item.notes;
+    if (item.serialNumber !== undefined) payload.serialNumber = item.serialNumber;
+    if (item.modelNumber !== undefined) payload.modelNumber = item.modelNumber;
+    if (item.manufacturer !== undefined) payload.manufacturer = item.manufacturer;
+    if (item.insured !== undefined) payload.insured = item.insured;
+    if (item.archived !== undefined) payload.archived = item.archived;
+    if (item.lifetimeWarranty !== undefined) payload.lifetimeWarranty = item.lifetimeWarranty;
+    if (item.warrantyExpires !== undefined) payload.warrantyExpires = item.warrantyExpires;
+    if (item.warrantyDetails !== undefined) payload.warrantyDetails = item.warrantyDetails;
+    if (item.purchaseTime !== undefined) payload.purchaseTime = item.purchaseTime;
+    if (item.purchaseFrom !== undefined) payload.purchaseFrom = item.purchaseFrom;
+    if (item.purchasePrice !== undefined) payload.purchasePrice = item.purchasePrice;
+    if (item.tagIds !== undefined) payload.tagIds = item.tagIds;
+    if (item.parentId !== undefined) payload.parentId = item.parentId;
 
     return this.request<HomeBoxItem>("/api/v1/items", "POST", payload);
   }
