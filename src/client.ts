@@ -195,4 +195,98 @@ export class HomeBoxClient {
 
     return created;
   }
+
+  async attachFile(
+    itemId: string,
+    fileBuffer: Buffer,
+    fileName: string,
+    options?: { type?: string; primary?: boolean }
+  ): Promise<HomeBoxItem> {
+    const token = await this.ensureToken();
+    const url = `${this.config.baseUrl}/api/v1/items/${itemId}/attachments`;
+
+    // Build FormData
+    const boundary = "----WebKitFormBoundary" + Math.random().toString(36).substr(2, 16);
+    const lines: string[] = [];
+
+    // Add file field
+    lines.push(`--${boundary}`);
+    lines.push(`Content-Disposition: form-data; name="file"; filename="${fileName}"`);
+    lines.push(`Content-Type: application/octet-stream`);
+    lines.push("");
+
+    // Add name field
+    lines.push(`--${boundary}`);
+    lines.push(`Content-Disposition: form-data; name="name"`);
+    lines.push("");
+    lines.push(fileName);
+
+    // Add type field if provided
+    if (options?.type) {
+      lines.push(`--${boundary}`);
+      lines.push(`Content-Disposition: form-data; name="type"`);
+      lines.push("");
+      lines.push(options.type);
+    }
+
+    // Add primary field if provided
+    if (options?.primary !== undefined) {
+      lines.push(`--${boundary}`);
+      lines.push(`Content-Disposition: form-data; name="primary"`);
+      lines.push("");
+      lines.push(String(options.primary));
+    }
+
+    lines.push(`--${boundary}--`);
+
+    // Build multipart body
+    const textPart = lines.join("\r\n");
+    const textBuffer = Buffer.from(textPart.substring(0, textPart.lastIndexOf("\r\n--" + boundary)));
+    const endBuffer = Buffer.from("\r\n--" + boundary + "--\r\n");
+
+    // Find the file insertion point (after the "filename" line + empty line)
+    const fileMarkerIndex = textPart.indexOf('Content-Type: application/octet-stream\r\n\r\n');
+    const beforeFile = textPart.substring(0, fileMarkerIndex + 'Content-Type: application/octet-stream\r\n\r\n'.length);
+    const afterFile = textPart.substring(fileMarkerIndex + 'Content-Type: application/octet-stream\r\n\r\n'.length);
+    const afterFileStart = afterFile.indexOf("\r\n--" + boundary);
+
+    const beforeFileBuffer = Buffer.from(beforeFile);
+    const afterFileBuffer = Buffer.from(afterFile.substring(afterFileStart));
+
+    const body = Buffer.concat([beforeFileBuffer, fileBuffer, afterFileBuffer, endBuffer]);
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": `multipart/form-data; boundary=${boundary}`,
+        Authorization: `Bearer ${token}`,
+      },
+      body,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HomeBox API error ${response.status}: ${response.statusText}`);
+    }
+
+    return (await response.json()) as HomeBoxItem;
+  }
+
+  async deleteAttachment(itemId: string, attachmentId: string): Promise<void> {
+    await this.request<void>(
+      `/api/v1/items/${itemId}/attachments/${attachmentId}`,
+      "DELETE"
+    );
+  }
+
+  async updateAttachment(
+    itemId: string,
+    attachmentId: string,
+    updates: { primary?: boolean }
+  ): Promise<HomeBoxItem> {
+    return this.request<HomeBoxItem>(
+      `/api/v1/items/${itemId}/attachments/${attachmentId}`,
+      "PUT",
+      updates
+    );
+  }
 }

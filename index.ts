@@ -236,6 +236,88 @@ const plugin = {
         };
       },
     });
+
+    // Tool 4: Attach file or image to item
+    api.registerTool({
+      name: "homebox_attach_file",
+      description: "Attach a file or image to a HomeBox item (supports jpg, png, pdf, etc.)",
+      parameters: {
+        type: "object",
+        properties: {
+          itemId: {
+            type: "string",
+            description: "The ID of the item to attach the file to",
+          },
+          filePath: {
+            type: "string",
+            description: "Path to the file to attach (e.g., /path/to/image.jpg or /tmp/document.pdf)",
+          },
+          fileName: {
+            type: "string",
+            description: "Display name for the file (e.g., 'receipt.jpg', 'manual.pdf'). If not provided, uses the filename from filePath",
+          },
+          type: {
+            type: "string",
+            description: "Type of attachment: 'photo' for images, 'attachment' for documents. Auto-detected if not provided",
+          },
+          primary: {
+            type: "boolean",
+            description: "Mark this as the primary/thumbnail image for the item",
+          },
+        },
+        required: ["itemId", "filePath"],
+      },
+      async execute(_id, params: any) {
+        const fs = require("fs");
+        const path = require("path");
+
+        try {
+          const client = getClient();
+          const filePath = params.filePath;
+          const fileName = params.fileName || path.basename(filePath);
+
+          // Resolve relative paths from current working directory
+          const resolvedPath = path.resolve(filePath);
+
+          // Check if file exists
+          if (!fs.existsSync(resolvedPath)) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `✗ File not found: ${resolvedPath}`,
+                },
+              ],
+            };
+          }
+
+          // Read file as buffer
+          const fileBuffer = fs.readFileSync(resolvedPath);
+
+          // Attach file to item
+          const result = await client.attachFile(params.itemId, fileBuffer, fileName, {
+            type: params.type,
+            primary: params.primary,
+          });
+
+          const attachment = result.attachments?.[result.attachments.length - 1];
+          const text = `✓ Attached to ${result.name}:\n• File: ${fileName}\n• Type: ${attachment?.type || "file"}${params.primary ? "\n• Set as primary image" : ""}`;
+
+          return {
+            content: [{ type: "text", text }],
+          };
+        } catch (error: any) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `✗ Failed to attach file: ${error.message}`,
+              },
+            ],
+          };
+        }
+      },
+    });
   },
 };
 
