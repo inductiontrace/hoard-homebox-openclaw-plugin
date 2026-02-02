@@ -62,9 +62,9 @@ Agents can combine these tools to manage inventory, answer "where is X?" questio
 
 1. **Install the plugin:**
    ```bash
-   openclaw plugins install /path/to/homebox-plugin-dev
+   openclaw plugins install /path/to/hoard-homebox-openclaw-plugin
    ```
-   (Or use `-l` for development: `openclaw plugins install -l /path/to/homebox-plugin-dev`)
+   (Or use `-l` for development: `openclaw plugins install -l /path/to/hoard-homebox-openclaw-plugin`)
 
 2. **Configure credentials** in `~/.openclaw/openclaw.json`:
    ```json
