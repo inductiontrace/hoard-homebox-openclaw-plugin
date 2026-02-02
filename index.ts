@@ -68,7 +68,7 @@ const plugin = {
     api.registerTool({
       name: "homebox_search",
       description:
-        "Search HomeBox inventory by keyword (e.g., resistor, capacitor, TL072)",
+        "Search HomeBox inventory by keyword (e.g., resistor, capacitor, TL072) - returns full item details",
       parameters: {
         type: "object",
         properties: {
@@ -81,7 +81,7 @@ const plugin = {
       },
       async execute(_id, params: { query: string }) {
         const client = getClient();
-        const items = await client.searchItems(params.query);
+        const items = await client.searchItemsExtended(params.query);
 
         const text =
           items.length === 0

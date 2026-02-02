@@ -119,6 +119,20 @@ export class HomeBoxClient {
     return response.items || [];
   }
 
+  async searchItemsExtended(query: string): Promise<HomeBoxItem[]> {
+    // Get basic search results first
+    const results = await this.searchItems(query);
+
+    // Fetch full details for each item in parallel
+    const fullItems = await Promise.all(
+      results.map(item =>
+        item.id ? this.request<HomeBoxItem>(`/api/v1/items/${item.id}`) : Promise.resolve(item)
+      )
+    );
+
+    return fullItems;
+  }
+
   async getLocations(): Promise<HomeBoxLocation[]> {
     return this.request<HomeBoxLocation[]>("/api/v1/locations");
   }
