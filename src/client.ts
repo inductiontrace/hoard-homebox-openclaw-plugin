@@ -205,55 +205,39 @@ export class HomeBoxClient {
     const token = await this.ensureToken();
     const url = `${this.config.baseUrl}/api/v1/items/${itemId}/attachments`;
 
-    // Build FormData
+    // Build multipart form data manually with proper formatting
     const boundary = "----WebKitFormBoundary" + Math.random().toString(36).substr(2, 16);
-    const lines: string[] = [];
-
-    // Add file field
-    lines.push(`--${boundary}`);
-    lines.push(`Content-Disposition: form-data; name="file"; filename="${fileName}"`);
-    lines.push(`Content-Type: application/octet-stream`);
-    lines.push("");
+    const parts: Buffer[] = [];
 
     // Add name field
-    lines.push(`--${boundary}`);
-    lines.push(`Content-Disposition: form-data; name="name"`);
-    lines.push("");
-    lines.push(fileName);
+    parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="name"\r\n\r\n`));
+    parts.push(Buffer.from(fileName));
+    parts.push(Buffer.from("\r\n"));
 
     // Add type field if provided
     if (options?.type) {
-      lines.push(`--${boundary}`);
-      lines.push(`Content-Disposition: form-data; name="type"`);
-      lines.push("");
-      lines.push(options.type);
+      parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="type"\r\n\r\n`));
+      parts.push(Buffer.from(options.type));
+      parts.push(Buffer.from("\r\n"));
     }
 
     // Add primary field if provided
     if (options?.primary !== undefined) {
-      lines.push(`--${boundary}`);
-      lines.push(`Content-Disposition: form-data; name="primary"`);
-      lines.push("");
-      lines.push(String(options.primary));
+      parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="primary"\r\n\r\n`));
+      parts.push(Buffer.from(String(options.primary)));
+      parts.push(Buffer.from("\r\n"));
     }
 
-    lines.push(`--${boundary}--`);
+    // Add file field (binary data)
+    parts.push(
+      Buffer.from(
+        `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${fileName}"\r\nContent-Type: application/octet-stream\r\n\r\n`
+      )
+    );
+    parts.push(fileBuffer);
+    parts.push(Buffer.from(`\r\n--${boundary}--\r\n`));
 
-    // Build multipart body
-    const textPart = lines.join("\r\n");
-    const textBuffer = Buffer.from(textPart.substring(0, textPart.lastIndexOf("\r\n--" + boundary)));
-    const endBuffer = Buffer.from("\r\n--" + boundary + "--\r\n");
-
-    // Find the file insertion point (after the "filename" line + empty line)
-    const fileMarkerIndex = textPart.indexOf('Content-Type: application/octet-stream\r\n\r\n');
-    const beforeFile = textPart.substring(0, fileMarkerIndex + 'Content-Type: application/octet-stream\r\n\r\n'.length);
-    const afterFile = textPart.substring(fileMarkerIndex + 'Content-Type: application/octet-stream\r\n\r\n'.length);
-    const afterFileStart = afterFile.indexOf("\r\n--" + boundary);
-
-    const beforeFileBuffer = Buffer.from(beforeFile);
-    const afterFileBuffer = Buffer.from(afterFile.substring(afterFileStart));
-
-    const body = Buffer.concat([beforeFileBuffer, fileBuffer, afterFileBuffer, endBuffer]);
+    const body = Buffer.concat(parts);
 
     const response = await fetch(url, {
       method: "POST",
