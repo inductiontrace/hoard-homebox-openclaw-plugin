@@ -124,29 +124,61 @@ export class HomeBoxClient {
   }
 
   async createItem(item: HomeBoxItem): Promise<HomeBoxItem> {
-    const payload: Record<string, unknown> = {
+    // Step 1: Create item with basic fields (POST only accepts these)
+    const createPayload: Record<string, unknown> = {
       name: item.name,
       quantity: item.quantity,
     };
 
-    // Add optional fields if provided
-    if (item.description !== undefined) payload.description = item.description;
-    if (item.locationId !== undefined) payload.locationId = item.locationId;
-    if (item.notes !== undefined) payload.notes = item.notes;
-    if (item.serialNumber !== undefined) payload.serialNumber = item.serialNumber;
-    if (item.modelNumber !== undefined) payload.modelNumber = item.modelNumber;
-    if (item.manufacturer !== undefined) payload.manufacturer = item.manufacturer;
-    if (item.insured !== undefined) payload.insured = item.insured;
-    if (item.archived !== undefined) payload.archived = item.archived;
-    if (item.lifetimeWarranty !== undefined) payload.lifetimeWarranty = item.lifetimeWarranty;
-    if (item.warrantyExpires !== undefined) payload.warrantyExpires = item.warrantyExpires;
-    if (item.warrantyDetails !== undefined) payload.warrantyDetails = item.warrantyDetails;
-    if (item.purchaseTime !== undefined) payload.purchaseTime = item.purchaseTime;
-    if (item.purchaseFrom !== undefined) payload.purchaseFrom = item.purchaseFrom;
-    if (item.purchasePrice !== undefined) payload.purchasePrice = item.purchasePrice;
-    if (item.tagIds !== undefined) payload.tagIds = item.tagIds;
-    if (item.parentId !== undefined) payload.parentId = item.parentId;
+    if (item.description !== undefined) createPayload.description = item.description;
+    if (item.locationId !== undefined) createPayload.locationId = item.locationId;
+    if (item.parentId !== undefined) createPayload.parentId = item.parentId;
+    if (item.tagIds !== undefined) createPayload.tagIds = item.tagIds;
 
-    return this.request<HomeBoxItem>("/api/v1/items", "POST", payload);
+    const created = await this.request<HomeBoxItem>("/api/v1/items", "POST", createPayload);
+
+    // Step 2: If extended fields provided, update item with PUT (POST endpoint ignores them)
+    const hasExtendedFields =
+      item.notes !== undefined ||
+      item.serialNumber !== undefined ||
+      item.modelNumber !== undefined ||
+      item.manufacturer !== undefined ||
+      item.insured !== undefined ||
+      item.archived !== undefined ||
+      item.lifetimeWarranty !== undefined ||
+      item.warrantyExpires !== undefined ||
+      item.warrantyDetails !== undefined ||
+      item.purchaseTime !== undefined ||
+      item.purchaseFrom !== undefined ||
+      item.purchasePrice !== undefined;
+
+    if (hasExtendedFields && created.id) {
+      const updatePayload: Record<string, unknown> = {
+        id: created.id,
+        name: created.name,
+        quantity: created.quantity,
+      };
+
+      if (item.description !== undefined) updatePayload.description = item.description;
+      if (item.locationId !== undefined) updatePayload.locationId = item.locationId;
+      if (item.notes !== undefined) updatePayload.notes = item.notes;
+      if (item.serialNumber !== undefined) updatePayload.serialNumber = item.serialNumber;
+      if (item.modelNumber !== undefined) updatePayload.modelNumber = item.modelNumber;
+      if (item.manufacturer !== undefined) updatePayload.manufacturer = item.manufacturer;
+      if (item.insured !== undefined) updatePayload.insured = item.insured;
+      if (item.archived !== undefined) updatePayload.archived = item.archived;
+      if (item.lifetimeWarranty !== undefined) updatePayload.lifetimeWarranty = item.lifetimeWarranty;
+      if (item.warrantyExpires !== undefined) updatePayload.warrantyExpires = item.warrantyExpires;
+      if (item.warrantyDetails !== undefined) updatePayload.warrantyDetails = item.warrantyDetails;
+      if (item.purchaseTime !== undefined) updatePayload.purchaseTime = item.purchaseTime;
+      if (item.purchaseFrom !== undefined) updatePayload.purchaseFrom = item.purchaseFrom;
+      if (item.purchasePrice !== undefined) updatePayload.purchasePrice = item.purchasePrice;
+      if (item.parentId !== undefined) updatePayload.parentId = item.parentId;
+      if (item.tagIds !== undefined) updatePayload.tagIds = item.tagIds;
+
+      return this.request<HomeBoxItem>(`/api/v1/items/${created.id}`, "PUT", updatePayload);
+    }
+
+    return created;
   }
 }
