@@ -273,4 +273,42 @@ export class HomeBoxClient {
       updates
     );
   }
+
+  async deleteItem(itemId: string): Promise<void> {
+    await this.request<void>(`/api/v1/items/${itemId}`, "DELETE");
+  }
+
+  async createLocation(
+    location: {
+      name: string;
+      description?: string;
+      parentId?: string;
+    }
+  ): Promise<HomeBoxLocation> {
+    return this.request<HomeBoxLocation>("/api/v1/locations", "POST", location);
+  }
+
+  async updateLocation(
+    locationId: string,
+    updates: {
+      name?: string;
+      description?: string;
+      parentId?: string;
+    }
+  ): Promise<HomeBoxLocation> {
+    const payload: any = { id: locationId };
+    if (updates.name !== undefined) payload.name = updates.name;
+    if (updates.description !== undefined) payload.description = updates.description;
+    if (updates.parentId !== undefined) payload.parentId = updates.parentId;
+
+    return this.request<HomeBoxLocation>(
+      `/api/v1/locations/${locationId}`,
+      "PUT",
+      payload
+    );
+  }
+
+  async deleteLocation(locationId: string): Promise<void> {
+    await this.request<void>(`/api/v1/locations/${locationId}`, "DELETE");
+  }
 }

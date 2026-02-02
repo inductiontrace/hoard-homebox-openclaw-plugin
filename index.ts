@@ -318,6 +318,225 @@ const plugin = {
         }
       },
     });
+
+    // Tool 5: Delete an item
+    api.registerTool({
+      name: "homebox_delete_item",
+      description: "Permanently delete an item from HomeBox (cannot be undone)",
+      parameters: {
+        type: "object",
+        properties: {
+          itemId: {
+            type: "string",
+            description: "The ID of the item to delete",
+          },
+        },
+        required: ["itemId"],
+      },
+      async execute(_id, params: { itemId: string }) {
+        try {
+          const client = getClient();
+          await client.deleteItem(params.itemId);
+          return {
+            content: [
+              {
+                type: "text",
+                text: `✓ Item deleted successfully`,
+              },
+            ],
+          };
+        } catch (error: any) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `✗ Failed to delete item: ${error.message}`,
+              },
+            ],
+          };
+        }
+      },
+    });
+
+    // Tool 6: Remove an attachment from an item
+    api.registerTool({
+      name: "homebox_remove_attachment",
+      description: "Remove a file or image attachment from an item",
+      parameters: {
+        type: "object",
+        properties: {
+          itemId: {
+            type: "string",
+            description: "The ID of the item",
+          },
+          attachmentId: {
+            type: "string",
+            description: "The ID of the attachment to remove",
+          },
+        },
+        required: ["itemId", "attachmentId"],
+      },
+      async execute(_id, params: { itemId: string; attachmentId: string }) {
+        try {
+          const client = getClient();
+          await client.deleteAttachment(params.itemId, params.attachmentId);
+          return {
+            content: [
+              {
+                type: "text",
+                text: `✓ Attachment removed`,
+              },
+            ],
+          };
+        } catch (error: any) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `✗ Failed to remove attachment: ${error.message}`,
+              },
+            ],
+          };
+        }
+      },
+    });
+
+    // Tool 7: Create a new location
+    api.registerTool({
+      name: "homebox_create_location",
+      description: "Create a new location/container in HomeBox (e.g., drawer, shelf, cabinet)",
+      parameters: {
+        type: "object",
+        properties: {
+          name: {
+            type: "string",
+            description: "Name of the location (e.g., 'Shelf A', 'Tool Drawer')",
+          },
+          description: {
+            type: "string",
+            description: "Optional description of the location",
+          },
+          parentId: {
+            type: "string",
+            description: "Optional ID of parent location (for nested locations)",
+          },
+        },
+        required: ["name"],
+      },
+      async execute(_id, params: any) {
+        try {
+          const client = getClient();
+          const location = await client.createLocation({
+            name: params.name,
+            description: params.description,
+            parentId: params.parentId,
+          });
+          const text = `✓ Created location:\n• Name: ${location.name}\n• ID: ${location.id}${location.description ? `\n• Description: ${location.description}` : ""}`;
+          return {
+            content: [{ type: "text", text }],
+          };
+        } catch (error: any) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `✗ Failed to create location: ${error.message}`,
+              },
+            ],
+          };
+        }
+      },
+    });
+
+    // Tool 8: Update an existing location
+    api.registerTool({
+      name: "homebox_update_location",
+      description: "Update a location's name, description, or parent",
+      parameters: {
+        type: "object",
+        properties: {
+          locationId: {
+            type: "string",
+            description: "The ID of the location to update",
+          },
+          name: {
+            type: "string",
+            description: "New name for the location",
+          },
+          description: {
+            type: "string",
+            description: "New description for the location",
+          },
+          parentId: {
+            type: "string",
+            description: "New parent location ID (for moving to nested structure)",
+          },
+        },
+        required: ["locationId"],
+      },
+      async execute(_id, params: any) {
+        try {
+          const client = getClient();
+          const location = await client.updateLocation(params.locationId, {
+            name: params.name,
+            description: params.description,
+            parentId: params.parentId,
+          });
+          const text = `✓ Updated location:\n• Name: ${location.name}${location.description ? `\n• Description: ${location.description}` : ""}`;
+          return {
+            content: [{ type: "text", text }],
+          };
+        } catch (error: any) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `✗ Failed to update location: ${error.message}`,
+              },
+            ],
+          };
+        }
+      },
+    });
+
+    // Tool 9: Delete a location
+    api.registerTool({
+      name: "homebox_delete_location",
+      description: "Permanently delete a location (cannot be undone, items are not deleted)",
+      parameters: {
+        type: "object",
+        properties: {
+          locationId: {
+            type: "string",
+            description: "The ID of the location to delete",
+          },
+        },
+        required: ["locationId"],
+      },
+      async execute(_id, params: { locationId: string }) {
+        try {
+          const client = getClient();
+          await client.deleteLocation(params.locationId);
+          return {
+            content: [
+              {
+                type: "text",
+                text: `✓ Location deleted successfully`,
+              },
+            ],
+          };
+        } catch (error: any) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `✗ Failed to delete location: ${error.message}`,
+              },
+            ],
+          };
+        }
+      },
+    });
   },
 };
 
