@@ -89,7 +89,7 @@ const plugin = {
             : `Found ${items.length} items:\n${items
                 .map(
                   (item) =>
-                    `• ${item.name} (qty: ${item.quantity}) @ ${item.location?.name || "Unknown"}${item.description ? `: ${item.description}` : ""}`
+                    `• ${item.name} (ID: ${item.id}) (qty: ${item.quantity}) @ ${item.location?.name || "Unknown"}${item.description ? `: ${item.description}` : ""}`
                 )
                 .join("\n")}`;
 
